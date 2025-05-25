@@ -146,5 +146,16 @@ namespace PromoCodeFactory.WebHost.Controllers
             _employeeRepository.Update(employeeExist);
             return Ok(id);
         }
+
+        [HttpDelete("{id:guid}")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        public IActionResult Delete(Guid id)
+        {
+            _employeeRepository.Delete(id);
+            return NoContent();
+
+        }
     }
 }
