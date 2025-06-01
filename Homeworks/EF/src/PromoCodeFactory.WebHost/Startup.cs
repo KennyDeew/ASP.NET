@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using PromoCodeFactory.Core.Abstractions.Repositories;
@@ -17,14 +18,17 @@ namespace PromoCodeFactory.WebHost
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
-            services.AddScoped(typeof(IRepository<Employee>), (x) =>
-                new InMemoryRepository<Employee>(FakeDataFactory.Employees));
-            services.AddScoped(typeof(IRepository<Role>), (x) =>
-                new InMemoryRepository<Role>(FakeDataFactory.Roles));
-            services.AddScoped(typeof(IRepository<Preference>), (x) =>
-                new InMemoryRepository<Preference>(FakeDataFactory.Preferences));
-            services.AddScoped(typeof(IRepository<Customer>), (x) =>
-                new InMemoryRepository<Customer>(FakeDataFactory.Customers));
+            services.AddScoped(typeof(IRepository<Customer>), typeof(EfRepository<Customer>));
+            services.AddScoped(typeof(IRepository<Preference>), typeof(EfRepository<Preference>));
+            services.AddScoped(typeof(IRepository<PromoCode>), typeof(EfRepository<PromoCode>));
+            services.AddScoped(typeof(IRepository<Role>), typeof(EfRepository<Role>));
+            services.AddScoped(typeof(IRepository<Employee>), typeof(EfRepository<Employee>));
+
+            services.AddDbContext<DataContext>(options =>
+            {
+                //options.UseSqlite(builder.Configuration.GetConnectionString("SqliteConnection"));
+                options.UseSqlite("Data Source=SQLiteTestDB.db");
+            });
 
             services.AddOpenApiDocument(options =>
             {
@@ -34,7 +38,7 @@ namespace PromoCodeFactory.WebHost
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, DataContext context)
         {
             if (env.IsDevelopment())
             {
@@ -44,6 +48,8 @@ namespace PromoCodeFactory.WebHost
             {
                 app.UseHsts();
             }
+
+            context.Database.Migrate();
 
             app.UseOpenApi();
             app.UseSwaggerUi(x =>
