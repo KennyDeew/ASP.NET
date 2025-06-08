@@ -17,7 +17,7 @@ namespace PromoCodeFactory.DataAccess.Data
 
         public DataContext(DbContextOptions<DataContext> options) : base(options)
         {
-            Database.EnsureDeleted();
+            //Database.EnsureDeleted();
 
             var isAvalable = Database.CanConnect();
             var result = isAvalable ? "Ok!" : "Fail";

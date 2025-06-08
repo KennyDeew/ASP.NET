@@ -50,7 +50,7 @@ namespace PromoCodeFactory.WebHost
                 app.UseHsts();
             }
 
-            context.Database.Migrate();
+            //context.Database.Migrate();
 
             app.UseOpenApi();
             app.UseSwaggerUi(x =>

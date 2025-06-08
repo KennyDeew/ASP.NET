@@ -21,6 +21,9 @@ namespace PromoCodeFactory.Core.Domain.Administration
         [Column("email"), MaxLength(50)]
         public string Email { get; set; }
 
+        [Column("mobile"), MaxLength(50)]
+        public string mobile { get; set; }
+
         public Role Role { get; set; }
 
         public Guid RoleId { get; set; }

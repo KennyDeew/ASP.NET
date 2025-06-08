@@ -80,7 +80,7 @@ namespace PromoCodeFactory.WebHost.Controllers
                 };
                 var created = await _promoCodeRepository.AddAsync(promocode);
             }
-            return NoContent();
+            return Ok();
         }
     }
 }
