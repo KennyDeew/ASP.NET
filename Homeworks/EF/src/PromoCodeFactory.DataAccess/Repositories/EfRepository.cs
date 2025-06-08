@@ -5,6 +5,7 @@ using PromoCodeFactory.DataAccess.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -31,6 +32,29 @@ namespace PromoCodeFactory.DataAccess.Repositories
         public async Task<T> GetByIdAsync(Guid id)
         {
             return await Context.Set<T>().FindAsync(id).AsTask();
+        }
+
+
+        public async Task<T> AddAsync(T entity)
+        {
+            var entityEntryAdded = await _entitySet.AddAsync(entity);
+            await Context.SaveChangesAsync();
+            return entityEntryAdded.Entity;
+        }
+
+        public async Task UpdateAsync(T entity)
+        {
+            Context.Update(entity);
+            await Context.SaveChangesAsync();
+        }
+
+        public async Task DeleteAsync(Guid id)
+        {
+            var entity = await GetByIdAsync(id);
+            if (entity == null)
+                return;
+            Context.Remove(entity);
+            await Context.SaveChangesAsync();
         }
     }
 }

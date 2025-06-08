@@ -102,17 +102,20 @@ namespace PromoCodeFactory.DataAccess.Data
             modelBuilder.Entity<Customer>()
                 .HasMany(c => c.Promocodes)
                 .WithOne(p => p.Customer)
-                .HasForeignKey(p => p.CustomerId);
+                .HasForeignKey(p => p.CustomerId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             //Связь Customer и Preferences (много ко многим)
             modelBuilder.Entity<CustomerPreference>()
                 .HasKey(cp => new { cp.CustomerId, cp.PreferenceId });
-            modelBuilder.Entity<Customer>()
-                .HasMany(c => c.CustomerPreferences)
-                .WithOne(cp => cp.Customer);
-            modelBuilder.Entity<Preference>()
-                .HasMany(p => p.CustomerPreferences)
-                .WithOne(cp => cp.Preference);
+            modelBuilder.Entity<CustomerPreference>()
+                .HasOne(cp => cp.Customer)
+                .WithMany(c => c.CustomerPreferences)
+                .HasForeignKey(cp => cp.CustomerId);
+            modelBuilder.Entity<CustomerPreference>()
+                .HasOne(cp => cp.Preference)
+                .WithMany(p => p.CustomerPreferences)
+                .HasForeignKey(cp => cp.PreferenceId);
 
             //Связь Preference и PromoCodes(1 предпочтение на много промокодов)
             modelBuilder.Entity<Preference>()

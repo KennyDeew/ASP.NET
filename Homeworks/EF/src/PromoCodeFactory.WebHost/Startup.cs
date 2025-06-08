@@ -18,11 +18,12 @@ namespace PromoCodeFactory.WebHost
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
-            services.AddScoped(typeof(IRepository<Customer>), typeof(EfRepository<Customer>));
+            //services.AddScoped(typeof(IRepository<Customer>), typeof(EfRepository<Customer>));
             services.AddScoped(typeof(IRepository<Preference>), typeof(EfRepository<Preference>));
             services.AddScoped(typeof(IRepository<PromoCode>), typeof(EfRepository<PromoCode>));
             services.AddScoped(typeof(IRepository<Role>), typeof(EfRepository<Role>));
             services.AddScoped(typeof(IRepository<Employee>), typeof(EfRepository<Employee>));
+            services.AddScoped(typeof(ICustomerRepository), typeof(CustomerRepository));
 
             services.AddDbContext<DataContext>(options =>
             {
