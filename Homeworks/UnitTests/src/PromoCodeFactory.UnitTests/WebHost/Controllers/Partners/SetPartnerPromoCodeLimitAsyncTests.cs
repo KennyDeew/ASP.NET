@@ -49,6 +49,25 @@ namespace PromoCodeFactory.UnitTests.WebHost.Controllers.Partners
             return partner;
         }
 
+        /// <summary>
+        /// Фабричный метод для создания PartnerPromoCodeLimit
+        /// </summary>
+        /// <param name="setup">Делегат для изменения свойств экземпляра PartnerPromoCodeLimit</param>
+        /// <returns></returns>
+        private PartnerPromoCodeLimit BuildPartnerPromoCodeLimit(Guid partnerId,Action<PartnerPromoCodeLimit> setup = null)
+        {
+            var partnerPromoCodeLimir = new PartnerPromoCodeLimit
+            {
+                Id = Guid.NewGuid(),
+                PartnerId = partnerId,
+                CreateDate = DateTime.UtcNow.AddHours(-1),
+                EndDate = DateTime.UtcNow.AddMonths(1),
+                Limit = 50
+            };
+            setup?.Invoke(partnerPromoCodeLimir);
+            return partnerPromoCodeLimir;
+        }
+
         [Fact]
         public async Task SetPartnerPromoCodeLimitAsync_Should_Throw_Exception_If_Partner_Is_NotFound_Return_404()
         {
@@ -77,6 +96,46 @@ namespace PromoCodeFactory.UnitTests.WebHost.Controllers.Partners
 
             // Assert
             result.Should().BeOfType<BadRequestObjectResult>();
+        }
+
+        /// <summary>
+        /// Если партнеру выставляется лимит и лимит не закончился, то количество обнуляется
+        /// </summary>
+        /// <returns></returns>
+        [Fact]
+        public async Task SetPartnerPromoCodeLimitAsync_If_Set_New_Limit_Should_Reset_NumberIssuedPromoCodes_To_Zero()
+        {
+            // Arrange
+            var partner = BuildPartner(p => p.PartnerLimits.Add(BuildPartnerPromoCodeLimit(p.Id)));
+            _partnersRepositoryMock.Setup(r => r.GetByIdAsync(partner.Id)).ReturnsAsync(partner);
+            var request = _fixture.Create<SetPartnerPromoCodeLimitRequest>();
+            request.Limit = 100;//Выставляем новый лимит
+
+            // Act
+            await _partnersController.SetPartnerPromoCodeLimitAsync(partner.Id, request);
+
+            // Assert
+            partner.NumberIssuedPromoCodes.Should().Be(0);
+        }
+
+        /// <summary>
+        /// Если партнеру выставляется лимит и лимит закончился, то количество не обнуляется
+        /// </summary>
+        /// <returns></returns>
+        [Fact]
+        public async Task SetPartnerPromoCodeLimitAsync_If_Set_NewLimit_And_PreviousLimitExpired_Should_Not_Reset_NumberIssuedPromoCodes()
+        {
+            // Arrange
+            var partner = BuildPartner(p => p.PartnerLimits.Add(BuildPartnerPromoCodeLimit(p.Id, pl => pl.CancelDate = DateTime.UtcNow.AddDays(-1))));//Выставляем лимит промокода истекшим
+            _partnersRepositoryMock.Setup(r => r.GetByIdAsync(partner.Id)).ReturnsAsync(partner);
+            var request = _fixture.Create<SetPartnerPromoCodeLimitRequest>();
+            request.Limit = 100;//Выставляем новый лимит
+
+            // Act
+            await _partnersController.SetPartnerPromoCodeLimitAsync(partner.Id, request);
+
+            // Assert
+            partner.NumberIssuedPromoCodes.Should().Be(5);
         }
     }
 }
