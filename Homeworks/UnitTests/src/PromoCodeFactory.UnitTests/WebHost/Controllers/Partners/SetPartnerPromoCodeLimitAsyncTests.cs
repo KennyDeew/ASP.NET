@@ -8,6 +8,7 @@ using PromoCodeFactory.WebHost.Controllers;
 using PromoCodeFactory.WebHost.Models;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -136,6 +137,22 @@ namespace PromoCodeFactory.UnitTests.WebHost.Controllers.Partners
 
             // Assert
             partner.NumberIssuedPromoCodes.Should().Be(5);
+        }
+
+        [Fact]
+        public async Task SetPartnerPromoCodeLimitAsync_If_Set_NewLimit_OldLimit_Should_Be_Canceled()
+        {
+            // Arrange
+            var partner = BuildPartner(p => p.PartnerLimits.Add(BuildPartnerPromoCodeLimit(p.Id)));
+            _partnersRepositoryMock.Setup(r => r.GetByIdAsync(partner.Id)).ReturnsAsync(partner);
+            var request = _fixture.Create<SetPartnerPromoCodeLimitRequest>();
+            request.Limit = 100;//Выставляем новый лимит
+
+            // Act
+            await _partnersController.SetPartnerPromoCodeLimitAsync(partner.Id, request);
+
+            // Assert
+            partner.PartnerLimits.FirstOrDefault().CancelDate.Should().NotBeNull();
         }
     }
 }
