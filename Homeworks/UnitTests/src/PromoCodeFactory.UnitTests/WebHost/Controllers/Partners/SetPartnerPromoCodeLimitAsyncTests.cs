@@ -154,5 +154,21 @@ namespace PromoCodeFactory.UnitTests.WebHost.Controllers.Partners
             // Assert
             partner.PartnerLimits.FirstOrDefault().CancelDate.Should().NotBeNull();
         }
+
+        [Fact]
+        public async Task SetPartnerPromoCodeLimitAsync_Limit_Should_Not_Be_Zero_Return400()
+        {
+            // Arrange
+            var partner = BuildPartner();
+            _partnersRepositoryMock.Setup(r => r.GetByIdAsync(partner.Id)).ReturnsAsync(partner);
+            var request = _fixture.Create<SetPartnerPromoCodeLimitRequest>();
+            request.Limit = 0;//Выставляем лимит равный нулю
+
+            // Act
+            var result = await _partnersController.SetPartnerPromoCodeLimitAsync(partner.Id, request);
+
+            // Assert
+            result.Should().BeOfType<BadRequestObjectResult>();
+        }
     }
 }
