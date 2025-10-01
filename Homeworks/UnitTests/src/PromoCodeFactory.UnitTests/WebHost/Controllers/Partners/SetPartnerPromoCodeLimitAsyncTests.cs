@@ -170,5 +170,23 @@ namespace PromoCodeFactory.UnitTests.WebHost.Controllers.Partners
             // Assert
             result.Should().BeOfType<BadRequestObjectResult>();
         }
+
+        [Fact]
+        public async Task SetPartnerPromoCodeLimitAsync_NewLimit_Should_Be_Saved_In_DB()
+        {
+            // Arrange
+            var partner = BuildPartner();
+            _partnersRepositoryMock.Setup(r => r.GetByIdAsync(partner.Id)).ReturnsAsync(partner);
+            var request = _fixture.Create<SetPartnerPromoCodeLimitRequest>();
+            request.Limit = 25;
+
+            // Act
+            var result = await _partnersController.SetPartnerPromoCodeLimitAsync(partner.Id, request);
+
+            // Assert
+            _partnersRepositoryMock.Verify(r => r.UpdateAsync(partner), Times.Once);
+            partner.PartnerLimits.Should().ContainSingle(x => x.Limit == request.Limit);
+            result.Should().BeOfType<CreatedAtActionResult>();
+        }
     }
 }
