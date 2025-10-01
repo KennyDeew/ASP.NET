@@ -24,10 +24,10 @@ jobs:
           dotnet-version: '8.0.x'
 
       - name: Restore dependencies
-        run: dotnet restore ./src/PromoCodeFactory.sln
+        run: dotnet restore ./src/PromoCodeFactory.UnitTests/PromoCodeFactory.UnitTests.csproj
 
       - name: Build
-        run: dotnet build ./src/PromoCodeFactory.sln --no-restore --configuration Release
+        run: dotnet build ./src/PromoCodeFactory.UnitTests/PromoCodeFactory.UnitTests.csproj --no-restore --configuration Release
 
       - name: Run tests
         run: dotnet test ./src/PromoCodeFactory.UnitTests/PromoCodeFactory.UnitTests.csproj --no-build --configuration Release --verbosity normal
